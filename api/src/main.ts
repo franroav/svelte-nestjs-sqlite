@@ -4,10 +4,17 @@ import { AppModule } from './app.module';
 import { Sequelize } from 'sequelize-typescript';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { seedDatabase } from './seed';
+import { CustomHttpException } from "./exeption/custom-http.exception";
+import { HttpStatus, ValidationPipe, VersioningType } from "@nestjs/common";
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
+  const port = 3000;
   const app = await NestFactory.create(AppModule);
-  
+  app.enableVersioning({
+    type: VersioningType.URI,
+});
+app.useLogger(app.get(Logger));
   const config = new DocumentBuilder()
     .setTitle('Cosechas')
     .setDescription('cosechas API')
@@ -15,13 +22,27 @@ async function bootstrap() {
     .addTag('cosechas')
     .build()
   const sequelize = app.get(Sequelize);
-  
+  try {
+    await seedDatabase(sequelize);
+  } catch (error) {
+    throw new CustomHttpException(
+      `Error de base de datos: ${error}`,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      'server error'
+  );
+  }
   // Seed database with sample data
-  await seedDatabase(sequelize);
+  
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+  app.useGlobalPipes(
+    new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+    })
+);
   app.enableCors();
-  await app.listen(3000);
+  await app.listen(port);
 }
 bootstrap();

@@ -9,6 +9,7 @@ import { HttpStatus, ValidationPipe, VersioningType } from "@nestjs/common";
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
+  const env = process.env.ENV || 'production';
   const port = 3000;
   const app = await NestFactory.create(AppModule);
   app.enableVersioning({

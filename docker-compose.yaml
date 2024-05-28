@@ -54,7 +54,22 @@ services:
       - onesta
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-
 networks:
   onesta:
     driver: bridge
+
+# pipelines:
+#     branches:
+#       develop:
+#         - step: *coverage
+#         - step: *code_quality
+#         - step: *build
+#         - step: *deploy
+#       master:
+#         - step: *coverage
+#         - step: *code_quality
+#         - step: *build
+#         - step:
+#             <<: *deploy
+#             name: Deploy Prod
+#             deployment: Prod

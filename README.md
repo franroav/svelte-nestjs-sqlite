@@ -1,6 +1,3 @@
-# Introduction to App
-
-<a href="https://youtu.be/Gp0-7oVOtPw" title="fluentd-intro"><img src="https://i.ytimg.com/vi/Gp0-7oVOtPw/hqdefault.jpg" width="20%" alt="fluentd-intro" /></a> 
 
 ## Machine local enviroment 
 

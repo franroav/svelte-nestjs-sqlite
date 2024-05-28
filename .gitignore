@@ -1,4 +1,6 @@
 api/node_modules/
+api/dist/
+api/.db/
 app/node_modules/
 app/.velte-kit/
 app/.vscode/

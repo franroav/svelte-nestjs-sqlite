@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+  svelte-app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    stdin_open: true
+    ports: 
+      - "5173:5173"
+    networks:
+      - onesta
+    depends_on:
+      - nginx
+      - api-server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5173 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  api-server:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - onesta
+    depends_on:
+      - nginx
+      - sqlite3
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  sqlite3:
+    image: nouchka/sqlite3:latest
+    volumes:
+      - ./db:/var/lib/sqlite/data
+    networks:
+      - onesta
+    environment:
+      - SQLITE_USER=sqlite
+      - SQLITE_PASSWORD=sqlite
+      - SQLITE_DB=sqlite
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    networks:
+      - onesta
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+networks:
+  onesta:
+    driver: bridge

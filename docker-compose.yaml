@@ -5,34 +5,30 @@ services:
       context: ./app
       dockerfile: Dockerfile
     stdin_open: true
-    ports: 
-      - "5173:5173"
     networks:
       - onesta
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.svelte-app.rule=Host(`localhost`)"
+      - "traefik.http.services.svelte-app.loadbalancer.server.port=5173"
     depends_on:
-      - nginx
+      - traefik
       - api-server
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5173 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   api-server:
     build:
       context: ./api
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
     networks:
       - onesta
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-server.rule=Host(`localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
+      - "traefik.http.routers.api-server.middlewares=api-strip@docker"
+      - "traefik.http.services.api-server.loadbalancer.server.port=3000"
     depends_on:
       - sqlite3
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   sqlite3:
     image: nouchka/sqlite3:latest
@@ -40,38 +36,83 @@ services:
       - ./.db:/var/lib/sqlite/data
     networks:
       - onesta
-    environment:
-      - SQLITE_USER=sqlite
-      - SQLITE_PASSWORD=sqlite
-      - SQLITE_DB=sqlite
 
-  nginx:
-    image: nginx:alpine
+  traefik:
+    image: traefik:v2.9
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+      - "--entrypoints.web.address=:80"
     ports:
       - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - onesta
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      api-server:
-        condition: service_healthy
 
 networks:
   onesta:
     driver: bridge
-# pipelines:
-#     branches:
-#       develop:
-#         - step: *coverage
-#         - step: *code_quality
-#         - step: *build
-#         - step: *deploy
-#       master:
-#         - step: *coverage
-#         - step: *code_quality
-#         - step: *build
-#         - step:
-#             <<: *deploy
-#             name: Deploy Prod
-#             deployment: Prod
+# version: "3.8"
+# services:
+#   svelte-app:
+#     build:
+#       context: ./app
+#       dockerfile: Dockerfile
+#     stdin_open: true
+#     ports: 
+#       - "5173:80"
+#     networks:
+#       - onesta
+#     depends_on:
+#       - nginx
+#       - api-server
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 5
+
+#   api-server:
+#     build:
+#       context: ./api
+#       dockerfile: Dockerfile
+#     ports:
+#       - "3000:3000"
+#     networks:
+#       - onesta
+#     depends_on:
+#       - sqlite3
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 5
+
+#   sqlite3:
+#     image: nouchka/sqlite3:latest
+#     volumes:
+#       - ./.db:/var/lib/sqlite/data
+#     networks:
+#       - onesta
+#     environment:
+#       - SQLITE_USER=sqlite
+#       - SQLITE_PASSWORD=sqlite
+#       - SQLITE_DB=sqlite
+
+#   nginx:
+#     image: nginx:alpine
+#     ports:
+#       - "80:80"
+#     networks:
+#       - onesta
+#     volumes:
+#       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#     depends_on:
+#       api-server:
+#         condition: service_healthy
+
+# networks:
+#   onesta:
+#     driver: bridge

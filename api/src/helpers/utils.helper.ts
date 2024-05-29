@@ -7,30 +7,24 @@ export class Utils {
   dtoValidationErrorMessage(errors: import("class-validator").ValidationError[]) {
     throw new Error('Method not implemented.');
   }
-  public startTime: number;
 
-  initializeTimeLog() {
-    this.startTime = Date.now();
-  }
   data_log(
     codigo: number,
     estado: string,
     respuesta: string,
     url: string,
   ) {
-    const tiempoTranscurrido = Date.now() - this.startTime;
     const uuid = uuidv4();
     const body = {
       uuid: uuid,
-      codigo: codigo,
+      statusCode: codigo,
+      timestamp: new Date().toDateString(),
+      path: url,
       respuesta: respuesta,
-      url: url,
       estado: estado,
-      tiempo: tiempoTranscurrido,
-      lugar: 'BFF denuncio siniestro auto',
     };
 
-    if (body.codigo > 300) {
+    if (body.statusCode > 300) {
       return Logger.log(JSON.stringify(body));
     } else {
       return Logger.error(JSON.stringify(body));

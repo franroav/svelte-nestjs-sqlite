@@ -5,8 +5,10 @@ import { Sequelize } from 'sequelize-typescript';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { seedDatabase } from './seed';
 import { CustomHttpException } from "./exeption/custom-http.exception";
-import { HttpStatus, ValidationPipe, VersioningType } from "@nestjs/common";
+import { HttpStatus, VersioningType } from "@nestjs/common";
 import { Logger } from 'nestjs-pino';
+
+import { ValidationPipe } from './pipes/class-validator/validation.pipe';
 
 async function bootstrap() {
   const env = process.env.ENV || 'production';
@@ -37,12 +39,7 @@ app.useLogger(app.get(Logger));
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  app.useGlobalPipes(
-    new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-    })
-);
+  app.useGlobalPipes(new ValidationPipe())
   app.enableCors();
   await app.listen(port);
 }

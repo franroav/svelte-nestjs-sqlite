@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sqlite3
+  namespace: onesta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqlite3
+  template:
+    metadata:
+      labels:
+        app: sqlite3
+    spec:
+      containers:
+        - name: sqlite3
+          image: nouchka/sqlite3:latest
+          ports:
+            - containerPort: 8080  # Change this if necessary
+          volumeMounts:
+            - name: sqlite3-storage
+              mountPath: /var/lib/sqlite/data
+          command: ["tail", "-f", "/dev/null"]  # Keep the container running
+      volumes:
+        - name: sqlite3-storage
+          persistentVolumeClaim:
+            claimName: sqlite3-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sqlite3
+  namespace: onesta
+spec:
+  ports:
+    - port: 8080  # Change this if necessary
+      targetPort: 8080
+  selector:
+    app: sqlite3

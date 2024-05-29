@@ -1,0 +1,38 @@
+# svelte-app.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svelte-app
+  namespace: onesta
+  labels:
+    app: svelte-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: svelte-app
+  template:
+    metadata:
+      labels:
+        app: svelte-app
+    spec:
+      containers:
+        - name: svelte-app
+          image: svelte-app
+          imagePullPolicy: Never # <-- Ensure this line is present
+          ports:
+            - containerPort: 5173
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svelte-app
+  namespace: onesta
+spec:
+  type: ClusterIP
+  selector:
+    app: svelte-app
+  ports:
+    - protocol: TCP
+      port: 5173
+      targetPort: 5173

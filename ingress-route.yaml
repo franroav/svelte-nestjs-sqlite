@@ -1,0 +1,41 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: svelte-app
+  namespace: onesta
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`localhost`)
+      kind: Rule
+      services:
+        - name: svelte-app
+          port: 5173
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-server
+  namespace: onesta
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`localhost`) && PathPrefix(`/api`)
+      kind: Rule
+      middlewares:
+        - name: api-strip
+      services:
+        - name: api-server
+          port: 3000
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: api-strip
+  namespace: onesta
+spec:
+  stripPrefix:
+    prefixes:
+      - /api

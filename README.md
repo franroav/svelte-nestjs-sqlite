@@ -50,26 +50,4 @@ npm install
 
 npm run dev
 
-```
-
-## docker enviroment and docker compose
-
-docker network create onesta
-cd /app
-docker build --no-cache --progress=plain -t svelte-app .
-cd ..
-cd /api
-docker build --no-cache --progress=plain -t nestjs-app .
-cd ..
-docker run -itd --name svelte-cont --net onesta -p 80:80 svelte-app 
-
-docker run -itd --name nestjs-cont --net onesta -p 80:80 nestjs-app 
-
-
-## docker compose 
-
-docker-compose up --build
-
-docker-compose down
-
-```
+``

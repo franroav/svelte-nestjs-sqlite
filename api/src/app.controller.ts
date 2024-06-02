@@ -46,8 +46,8 @@ export class UploadController {
       console.log("resetStream ", resetStream);
       const entities = await this.csvParser.parse(resetStream, GenericDto);
       console.log("Parsed Entities =>", entities.list);
-      this.appService.updateFileIntoDb(entities.list);
-      return entities.list;
+      // this.appService.updateFileIntoDb(entities.list);
+      return this.appService.updateFileIntoDb(entities.list);
     } catch (error) {
       console.error("Error parsing CSV file:", error);
       return { message: 'Error parsing CSV file', error };

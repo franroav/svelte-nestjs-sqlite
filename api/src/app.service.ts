@@ -47,16 +47,17 @@ export class AppService {
 
         this.logger.log('Entities created successfully', JSON.stringify(result));
         results.push(result);
-        successfully.push(result);
+        successfully.push( {code: 200, message : 'Informacion insertada satisfactoriamente ..', response: result, request: row});
       } catch (error) {
         this.logger.error('Error creating entities', { row, error: error.message, stack: error.stack });
-        results.push({ error: 'Error creating entities', details: error.message });
+        rejected.push({code: 400, message : 'Solicitud rechazada para insertar a base de datos ..', request: row, error: 'Error creating entities', details: JSON.stringify(error.message + ' ' + error.stack)});
+        // results.push({ error: 'Error creating entities', details: error.message });
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
-    return results;
+    return {data: results, exitosas: successfully, rechazadas: rejected };
   }
 
   private async createAgricultor(data) {

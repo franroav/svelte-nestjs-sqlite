@@ -8,5 +8,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
   imports: [SequelizeModule.forFeature([Variedad])],
   controllers: [VariedadesController],
   providers: [VariedadesService],
+  exports: [VariedadesService],
 })
 export class VariedadesModule {}

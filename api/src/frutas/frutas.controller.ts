@@ -59,4 +59,5 @@ export class FrutasController {
   remove(@Param('id') id: string) {
     return this.frutasService.remove(+id);
   }
+  
 }

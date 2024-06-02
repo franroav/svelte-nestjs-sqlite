@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
+import { AppController, UploadController } from './app.controller';
 import { APP_FILTER } from '@nestjs/core';
 import { AppService } from './app.service';
 import { FrutasModule } from './frutas/frutas.module';
@@ -12,6 +12,10 @@ import { VariedadesModule } from './variedades/variedades.module';
 import { CamposModule } from './campos/campos.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { CsvModule } from 'nest-csv-parser'
+import {MulterModule} from "@nestjs/platform-express";
+import { AgricultoresService } from './agricultores/agricultores.service';
+
 
 @Module({
   imports: [
@@ -24,8 +28,10 @@ import { LoggerModule } from 'nestjs-pino';
     CamposModule,
     ClientesModule,
     SequelizeModule.forRoot(dataBaseConfig),
+    CsvModule,
+    MulterModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, UploadController ],
   providers: [AppService],
 })
 export class AppModule {}

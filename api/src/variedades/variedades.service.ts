@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateVariedadeDto } from './dto/create-variedade.dto';
 import { UpdateVariedadeDto } from './dto/update-variedade.dto';
 import { Variedad } from './entities/variedade.entity';
@@ -11,7 +11,15 @@ export class VariedadesService {
     private variedadeRepository: typeof Variedad,
   ) {}
 
-  create(createVariedadeDto: CreateVariedadeDto) {
+  findByName(nombre: string) {
+    return this.variedadeRepository.findOne({ where: { nombre} });
+  }
+
+  async create(createVariedadeDto: CreateVariedadeDto) {
+    const exists = await this.findByName(createVariedadeDto['nombre']);
+    if (exists) {
+      throw new HttpException('Variedad with this name already exists', HttpStatus.CONFLICT);
+    }
     return this.variedadeRepository.create(createVariedadeDto as any);
   }
 

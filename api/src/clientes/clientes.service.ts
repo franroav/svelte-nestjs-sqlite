@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { Cliente } from './entities/cliente.entity';
@@ -11,7 +11,17 @@ export class ClientesService {
     private clienteRepository: typeof Cliente,
   ) {}
 
-  create(createClienteDto: CreateClienteDto) {
+  
+  findByEmail(email: string) {
+    return this.clienteRepository.findOne({ where: { email } });
+  }
+
+
+  async create(createClienteDto: CreateClienteDto) {
+    const exists = await this.findByEmail(createClienteDto['email']);
+    if (exists) {
+      throw new HttpException('Email already exists for Cliente', HttpStatus.CONFLICT);
+    }
     return this.clienteRepository.create(createClienteDto as any);
   }
 

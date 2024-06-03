@@ -1,5 +1,5 @@
 
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateFrutaDto } from './dto/create-fruta.dto';
 import { UpdateFrutaDto } from './dto/update-fruta.dto';
 import { Fruta } from './entities/fruta.entity';
@@ -12,11 +12,17 @@ export class FrutasService {
     private frutaRepository: typeof Fruta,
   ) {}
 
-  create(createFrutaDto: CreateFrutaDto) {
-    
-    return this.frutaRepository.create(createFrutaDto as any);
+  findByName(nombre: string) {
+    return this.frutaRepository.findOne({ where: { nombre } });
   }
 
+  async create(createFrutaDto: CreateFrutaDto) {
+    const exists = await this.findByName(createFrutaDto['nombre']);
+    if (exists) {
+      throw new HttpException('Fruta with this name already exists', HttpStatus.CONFLICT);
+    }
+    return this.frutaRepository.create(createFrutaDto as any);
+  }
   findAll() {
     return this.frutaRepository.findAll();
   }

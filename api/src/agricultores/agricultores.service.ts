@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAgricultoreDto } from './dto/create-agricultore.dto';
 import { UpdateAgricultoreDto } from './dto/update-agricultore.dto';
 import { Agricultor } from './entities/agricultore.entity';
@@ -11,7 +11,15 @@ export class AgricultoresService {
     private agricultorRepository: typeof Agricultor,
   ) {}
 
-  create(createAgricultorDto: CreateAgricultoreDto) {
+  findByEmail(email: string) {
+    return this.agricultorRepository.findOne({ where: { email } });
+  }
+
+  async create(createAgricultorDto: CreateAgricultoreDto) {
+    const exists = await this.findByEmail(createAgricultorDto['email']);
+    if (exists) {
+      throw new HttpException('Email already exists for Agricultor', HttpStatus.CONFLICT);
+    }
     return this.agricultorRepository.create(createAgricultorDto as any);
   }
 

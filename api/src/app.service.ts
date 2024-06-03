@@ -18,11 +18,10 @@ export class AppService {
   ) {}
 
   async updateFileIntoDb(data: any) {
-    if (data.length < 1) return [];
+    if (data.length < 1) return { exitosas: [], rechazadas: [] };
 
-    const results = [];
-    const successfully = []
-    const rejected = []
+    const successfully = [];
+    const rejected = [];
 
     for (const row of data) {
       const emailAgricultor = row["Mail Agricultor"];
@@ -36,81 +35,104 @@ export class AppService {
       const frutaCosechada = row["Fruta Cosechada"];
       const variedadCosechada = row["Variedad Cosechada"];
 
-      try {
-        const result = await Promise.all([
-          this.createAgricultor({ nombre: `${nombreAgricultor} ${apellidoAgricultor}`, email: emailAgricultor }),
-          this.createCliente({ nombre: `${nombreCliente} ${apellidoCliente}`, email: emailCliente }),
-          this.createCampo({ nombre: nombreCampo, ubicacion: ubicacionCampo }),
-          this.createFruta({ nombre: frutaCosechada }),
-          this.createVariedad({ nombre: variedadCosechada }),
-        ]);
-
-        this.logger.log('Entities created successfully', JSON.stringify(result));
-        results.push(result);
-        successfully.push( {code: 200, message : 'Informacion insertada satisfactoriamente ..', response: result, request: row});
-      } catch (error) {
-        this.logger.error('Error creating entities', { row, error: error.message, stack: error.stack });
-        rejected.push({code: 400, message : 'Solicitud rechazada para insertar a base de datos ..', request: row, error: 'Error creating entities', details: JSON.stringify(error.message + ' ' + error.stack)});
-        // results.push({ error: 'Error creating entities', details: error.message });
+      if (
+        !emailAgricultor || !nombreAgricultor || !apellidoAgricultor ||
+        !emailCliente || !nombreCliente || !apellidoCliente ||
+        !nombreCampo || !ubicacionCampo || !frutaCosechada || !variedadCosechada
+      ) {
+        this.logger.warn(`Skipping row with empty values: ${JSON.stringify(row)}`);
+        continue;
       }
+
+      const promises = [
+        this.createAgricultor({ nombre: `${nombreAgricultor} ${apellidoAgricultor}`, email: emailAgricultor }),
+        this.createCliente({ nombre: `${nombreCliente} ${apellidoCliente}`, email: emailCliente }),
+        this.createCampo({ nombre: nombreCampo, ubicacion: ubicacionCampo }),
+        this.createFruta({ nombre: frutaCosechada }),
+        this.createVariedad({ nombre: variedadCosechada, fruta: frutaCosechada }),
+      ];
+
+      const results: any = await Promise.allSettled(promises);
+      let rejectResponseTemplate = {
+        code: null,
+        message: 'Solicitud rechazada para insertar a base de datos.',
+        request: row,
+        errors: null
+      }
+
+      let successResponseTemplate = {
+        code: 200,
+        message: 'Información insertada satisfactoriamente.',
+        request: row,
+        entities: null,
+        response: null,
+      }
+
+      results.forEach((result, index) => {
+
+        if (result.status === 'rejected') {
+          rejectResponseTemplate['code'] = result.reason['status'] || 400
+          rejectResponseTemplate['errors'] = result.reason
+          rejected.push({
+            ...rejectResponseTemplate,
+          });
+        } else {
+          successResponseTemplate['entities'] = result.value.constructor.name;
+          successResponseTemplate['response'] = result.value
+          successfully.push({
+            ...successResponseTemplate
+          });
+        }
+
+      });
 
       await new Promise(resolve => setTimeout(resolve, 200));
     }
 
-    return {data: results, exitosas: successfully, rechazadas: rejected };
+    return {count:[...successfully, ...rejected].length,  data: successfully, rechazadas: rejected };
   }
 
   private async createAgricultor(data) {
-    const request = JSON.stringify(data);
     try {
-      const result = await this.agricultorService.create(data);
-      return result;
+      return await this.agricultorService.create(data);
     } catch (error) {
-      this.logger.error(`Error creating agricultor: ${request}`, { data, error: error.message, stack: error.stack });
+      this.logger.error(`Error creating agricultor: ${JSON.stringify(data)}`, { error: error.message, stack: error.stack });
       throw error;
     }
   }
 
   private async createCliente(data) {
-    const request = JSON.stringify(data);
     try {
-      const result = await this.clienteService.create(data);
-      return result;
+      return await this.clienteService.create(data);
     } catch (error) {
-      this.logger.error(`Error creating cliente: ${request}`, { data, error: error.message, stack: error.stack });
+      this.logger.error(`Error creating cliente: ${JSON.stringify(data)}`, { error: error.message, stack: error.stack });
       throw error;
     }
   }
 
   private async createCampo(data) {
-    const request = JSON.stringify(data);
     try {
-      const result = await this.campoService.create(data);
-      return result;
+      return await this.campoService.create(data);
     } catch (error) {
-      this.logger.error(`Error creating campo: ${request}`, { data, error: error.message, stack: error.stack });
+      this.logger.error(`Error creating campo: ${JSON.stringify(data)}`, { error: error.message, stack: error.stack });
       throw error;
     }
   }
 
   private async createFruta(data) {
-    const request = JSON.stringify(data);
     try {
-      const result = await this.frutaService.create(data);
-      return result;
+      return await this.frutaService.create(data);
     } catch (error) {
-      this.logger.error(`Error creating fruta: ${request}`, { data, error: error.message, stack: error.stack });
+      this.logger.error(`Error creating fruta: ${JSON.stringify(data)}`, { error: error.message, stack: error.stack });
       throw error;
     }
   }
 
   private async createVariedad(data) {
-    const request = JSON.stringify(data);
     try {
-      const result = await this.variedadService.create(data);
-      return result;
+      return await this.variedadService.create(data);
     } catch (error) {
-      this.logger.error(`Error creating variedad: ${request}`, { data, error: error.message, stack: error.stack });
+      this.logger.error(`Error creating variedad: ${JSON.stringify(data)}`, { error: error.message, stack: error.stack });
       throw error;
     }
   }

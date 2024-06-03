@@ -1,96 +1,118 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AgricultoresService } from './agricultores.service';
-import { AxiosResponse } from 'axios';
-// import { HttpModule, HttpService } from '@nestjs/common';
+import { getModelToken } from '@nestjs/sequelize';
+import { Agricultor } from './entities/agricultore.entity';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('AgricultoresService', () => {
   let service: AgricultoresService;
-  const response: AxiosResponse<any> = {
-    data: {},
-    headers: {},
-    // url: 'http://localhost:3000/mockUrl',
-    config: null,
-    status: 201,
-    statusText: 'OK',
+  let agricultorRepository: typeof Agricultor;
+
+  const mockAgricultorRepository = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findByPk: jest.fn(),
+    update: jest.fn(),
+    destroy: jest.fn(),
   };
+
+  const mockAgricultor = {
+    id: 1,
+    email: 'test@example.com',
+    nombre: 'Test Agricultor',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      // imports: [
-      //   HttpModule.registerAsync({
-      //     useFactory: () => ({
-      //       timeout: 30000,
-      //       maxRedirects: 5,
-      //     }),
-      //   }),
-      // ],
-      providers: [AgricultoresService],
+      providers: [
+        AgricultoresService,
+        {
+          provide: getModelToken(Agricultor),
+          useValue: mockAgricultorRepository,
+        },
+      ],
     }).compile();
 
     service = module.get<AgricultoresService>(AgricultoresService);
-    // service = await module.resolve<AgricultoresService>(AgricultoresService);
-    // httpService = await module.resolve<HttpService>(HttpService);
+    agricultorRepository = module.get<typeof Agricultor>(getModelToken(Agricultor));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
+  describe('create', () => {
+    it('should create an agricultor if email does not exist', async () => {
+      mockAgricultorRepository.findOne.mockResolvedValue(null);
+      mockAgricultorRepository.create.mockResolvedValue(mockAgricultor);
 
-  // it('verificar metodo con request es igual a null', async () => {
-  //   const request: any = null;
-  //   const data: AgricultoresService = [
-  //     {
-  //       "id": 1,
-  //       "nombre": "Casimir",
-  //       "email": "Jeff33@yahoo.com",
-  //       "createdAt": "2024-05-28T03:29:08.338Z",
-  //       "updatedAt": "2024-05-28T03:29:08.338Z"
-  //     },
-  //     {
-  //       "id": 2,
-  //       "nombre": "Hosea",
-  //       "email": "Erica.Feest8@gmail.com",
-  //       "createdAt": "2024-05-28T03:29:08.350Z",
-  //       "updatedAt": "2024-05-28T03:29:08.350Z"
-  //     },
-  //     {
-  //       "id": 3,
-  //       "nombre": "Lauren",
-  //       "email": "Enola84@gmail.com",
-  //       "createdAt": "2024-05-28T03:29:08.362Z",
-  //       "updatedAt": "2024-05-28T03:29:08.362Z"
-  //     },
-  //     {
-  //       "id": 4,
-  //       "nombre": "Warren",
-  //       "email": "Jayson26@hotmail.com",
-  //       "createdAt": "2024-05-28T03:29:08.374Z",
-  //       "updatedAt": "2024-05-28T03:29:08.374Z"
-  //     },
-  //     {
-  //       "id": 5,
-  //       "nombre": "Aileen",
-  //       "email": "Frederic6@yahoo.com",
-  //       "createdAt": "2024-05-28T03:29:08.385Z",
-  //       "updatedAt": "2024-05-28T03:29:08.385Z"
-  //     }
-  //   ];
-  //   response.data = data;
+      const result = await service.create({
+        email: 'test@example.com',
+        nombre: 'Test Agricultor',
+      });
 
-  //   jest
-  //     .spyOn(httpService, 'post')
-  //     .mockImplementationOnce(() => of(response));
-  //   jest.spyOn(service, 'ingresarDenuncioAuto');
+      expect(result).toEqual(mockAgricultor);
+      expect(mockAgricultorRepository.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
+      expect(mockAgricultorRepository.create).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        nombre: 'Test Agricultor',
+      });
+    });
 
-  //   try {
-  //     await service.ingresarDenuncioAuto(request);
-  //   } catch (error) {
-  //     expect(error).toHaveProperty('message');
-  //     expect(error).toHaveProperty('status');
-  //     expect(error.message).toBe(
-  //       'Solicitud(request) invalido por reglas de negocio',
-  //     );
-  //     expect(error.status).toBe(400);
-  //   }
-  // });
+    it('should throw an error if email already exists', async () => {
+      mockAgricultorRepository.findOne.mockResolvedValue(mockAgricultor);
+
+      await expect(service.create({
+        email: 'test@example.com',
+        nombre: 'Test Agricultor',
+      })).rejects.toThrow(new HttpException('Email already exists for Agricultor', HttpStatus.CONFLICT));
+
+      expect(mockAgricultorRepository.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
+      expect(mockAgricultorRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return an array of agricultors', async () => {
+      mockAgricultorRepository.findAll.mockResolvedValue([mockAgricultor]);
+
+      const result = await service.findAll();
+      expect(result).toEqual([mockAgricultor]);
+      expect(mockAgricultorRepository.findAll).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return an agricultor by id', async () => {
+      mockAgricultorRepository.findByPk.mockResolvedValue(mockAgricultor);
+
+      const result = await service.findOne(1);
+      expect(result).toEqual(mockAgricultor);
+      expect(mockAgricultorRepository.findByPk).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('update', () => {
+    it('should update an agricultor by id', async () => {
+      mockAgricultorRepository.update.mockResolvedValue([1]);
+
+      const result = await service.update(1, { nombre: 'Updated Agricultor' });
+      expect(result).toEqual([1]);
+      expect(mockAgricultorRepository.update).toHaveBeenCalledWith({ nombre: 'Updated Agricultor' }, { where: { id: 1 } });
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove an agricultor by id', async () => {
+      mockAgricultorRepository.destroy.mockResolvedValue(1);
+
+      const result = await service.remove(1);
+      expect(result).toEqual(1);
+      expect(mockAgricultorRepository.destroy).toHaveBeenCalledWith({ where: { id: 1 } });
+    });
+  });
 });
+

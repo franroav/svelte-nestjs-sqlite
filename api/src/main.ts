@@ -10,20 +10,37 @@ import { Logger } from 'nestjs-pino';
 import { AppConfigService } from './config/configuration.service';
 import { ValidationPipe } from './pipes/class-validator/validation.pipe';
 import { GlobalExceptionsFilters } from './filters/global-exception.filter';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import csurf from 'csurf';
+import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware';
 
 async function bootstrap() {
   const env = process.env.ENV || 'production';
   const port = 3000;
   const app = await NestFactory.create(AppModule);
   const appConfig = app.get(AppConfigService);
+
+  // Security middlewares
+  app.use(helmet());
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // limit each IP to 100 requests per windowMs
+    }),
+  );
+  app.use(csurf());
+  // versioning
   app.enableVersioning({
     type: VersioningType.URI,
   });
+  // logger middlewares
   app.useLogger(app.get(Logger));
+  // prefix
   app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe());
+  // cors
   app.enableCors();
-
+  // documentation
   if (appConfig.appActiveSwagger) {
     const options = new DocumentBuilder()
       .setTitle('Cosechas')
@@ -35,7 +52,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, options);
     SwaggerModule.setup('swagger', app, document);
   }
-
+  // database
   if (appConfig.appActiveDatabase) {
     const sequelize = app.get(Sequelize);
 
@@ -49,9 +66,11 @@ async function bootstrap() {
       );
     }
   }
-
-    // Apply the global exception filter
-    app.useGlobalFilters(new GlobalExceptionsFilters());
+  // Apply the DTO validation Pipe
+  app.useGlobalPipes(new ValidationPipe());
+  // Apply other global middlewares and filters
+  app.use(new CorrelationIdMiddleware().use);
+  app.useGlobalFilters(new GlobalExceptionsFilters());
 
   await app.listen(port);
 }

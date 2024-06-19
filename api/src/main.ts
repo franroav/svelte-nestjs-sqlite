@@ -9,6 +9,7 @@ import { HttpStatus, VersioningType } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import { AppConfigService } from './config/configuration.service';
 import { ValidationPipe } from './pipes/class-validator/validation.pipe';
+import { GlobalExceptionsFilters } from './filters/global-exception.filter';
 
 async function bootstrap() {
   const env = process.env.ENV || 'production';
@@ -48,6 +49,9 @@ async function bootstrap() {
       );
     }
   }
+
+    // Apply the global exception filter
+    app.useGlobalFilters(new GlobalExceptionsFilters());
 
   await app.listen(port);
 }

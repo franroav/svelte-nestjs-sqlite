@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AgricultoresService } from './agricultores/agricultores.service';
-import { CamposService } from './campos/campos.service';
-import { ClientesService } from './clientes/clientes.service';
-import { FrutasService } from './frutas/frutas.service';
-import { VariedadesService } from './variedades/variedades.service';
+import { AgricultoresService } from './modules/agricultores/agricultores.service';
+import { CamposService } from './modules/campos/campos.service';
+import { ClientesService } from './modules/clientes/clientes.service';
+import { FrutasService } from './modules/frutas/frutas.service';
+import { VariedadesService } from './modules/variedades/variedades.service';
 
 @Injectable()
 export class AppService {

@@ -4,7 +4,7 @@ import { CosechasService } from './cosechas.service';
 import { CreateCosechaDto } from './dto/request/create-cosecha.dto';
 import { UpdateCosechaDto } from './dto/request/update-cosecha.dto';
 import { ResponseCosechaDto } from './dto/response/response-cosecha.dto';
-import { CustomCacheInterceptor } from '../interceptor/cache.interceptor';
+import { CustomCacheInterceptor } from '../../interceptor/cache.interceptor';
 
 @Controller({
   path: 'cosechas',

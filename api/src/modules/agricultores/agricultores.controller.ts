@@ -4,7 +4,7 @@ import { AgricultoresService } from './agricultores.service';
 import { CreateAgricultoreDto } from './dto/create-agricultore.dto';
 import { UpdateAgricultoreDto } from './dto/update-agricultore.dto';
 
-import { agricultores } from '../mocks/agricultor.mock';
+import { agricultores } from '../../mocks/agricultor.mock';
 import { request } from 'src/mocks/mock'
 @Controller({
   path: 'agricultores',

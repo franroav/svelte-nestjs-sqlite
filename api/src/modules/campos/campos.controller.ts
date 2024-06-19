@@ -4,7 +4,7 @@ import { CamposService } from './campos.service';
 import { CreateCampoDto } from './dto/create-campo.dto';
 import { UpdateCampoDto } from './dto/update-campo.dto';
 
-import { campos } from '../mocks/campos.mock';
+import { campos } from '../../mocks/campos.mock';
 import { request } from 'src/mocks/mock'
 
 @Controller({

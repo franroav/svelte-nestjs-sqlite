@@ -4,7 +4,7 @@ import { FrutasService } from './frutas.service';
 import { CreateFrutaDto } from './dto/create-fruta.dto';
 import { UpdateFrutaDto } from './dto/update-fruta.dto';
 
-import { frutas } from '../mocks/frutas.mock';
+import { frutas } from '../../mocks/frutas.mock';
 import { request } from 'src/mocks/mock'
 @Controller({
   path: 'frutas',

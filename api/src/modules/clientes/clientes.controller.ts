@@ -5,7 +5,7 @@ import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 
 
-import { clientes } from '../mocks/clientes.mock';
+import { clientes } from '../../mocks/clientes.mock';
 import { request } from 'src/mocks/mock'
 @Controller({
   path: 'clientes',

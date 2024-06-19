@@ -1,11 +1,11 @@
 // src/seed.ts
 import { Sequelize } from 'sequelize-typescript';
-import { Fruta } from './frutas/entities/fruta.entity';
-import { Variedad } from './variedades/entities/variedade.entity';
-import { Agricultor } from './agricultores/entities/agricultore.entity';
-import { Campo } from './campos/entities/campo.entity';
-import { Cliente } from './clientes/entities/cliente.entity';
-import { Cosecha } from './cosechas/entities/cosecha.entity';
+import { Fruta } from './modules/frutas/entities/fruta.entity';
+import { Variedad } from './modules/variedades/entities/variedade.entity';
+import { Agricultor } from './modules/agricultores/entities/agricultore.entity';
+import { Campo } from './modules/campos/entities/campo.entity';
+import { Cliente } from './modules/clientes/entities/cliente.entity';
+import { Cosecha } from './modules/cosechas/entities/cosecha.entity';
 import { faker } from '@faker-js/faker';
 
 

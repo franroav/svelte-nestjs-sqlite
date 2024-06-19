@@ -28,7 +28,7 @@ export async function seedDatabase(sequelize: Sequelize) {
     }
     variedades.push({nombre: faker.random.word(),
       frutaId: fruta.id})
-      console.log("fruta", fruta)
+      // console.log("fruta", fruta)
   }
 
   // Crear Agricultores y Campos

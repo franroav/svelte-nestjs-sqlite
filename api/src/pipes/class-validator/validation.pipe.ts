@@ -18,6 +18,9 @@ export class ValidationPipe implements PipeTransform<any> {
     }
     const object = plainToInstance(metatype, value);
     const errors = await validate(object);
+
+    // console.log("object", object)
+    // console.log("errors", errors)
     // validate DTO's errors 
     const utils = new Utils();
     if (errors.length > 0) {
@@ -26,12 +29,12 @@ export class ValidationPipe implements PipeTransform<any> {
       //throw new BadRequestException(message);
     }
     // validate if string property value are sql injection
-    const {isValid, message} = utils.objectValidationSql(object);
+    // const {isValid, message} = utils.objectValidationSql(object);
 
-    valid = isValid
-    if (!valid) {
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
-    }
+    // valid = isValid
+    // if (!valid) {
+    //   throw new HttpException(message, HttpStatus.BAD_REQUEST);
+    // }
     return value;
   }
 

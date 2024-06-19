@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Scope, Param, Delete } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseInterceptors } from '@nestjs/common';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CosechasService } from './cosechas.service';
-import { CreateCosechaDto } from './dto/create-cosecha.dto';
-import { UpdateCosechaDto } from './dto/update-cosecha.dto';
-
-import { cosechas } from '../mocks/cosechas.mock';
-import { request } from 'src/mocks/mock'
+import { CreateCosechaDto } from './dto/request/create-cosecha.dto';
+import { UpdateCosechaDto } from './dto/request/update-cosecha.dto';
+import { ResponseCosechaDto } from './dto/response/response-cosecha.dto';
+import { CustomCacheInterceptor } from '../interceptor/cache.interceptor';
 
 @Controller({
   path: 'cosechas',
@@ -20,21 +19,20 @@ export class CosechasController {
     type: CreateCosechaDto,
     description: "Ingresar cosechas.",
     examples: {
-        a: {
-            summary: "Mock Ingresar variedad de prueba.",
-            description: "Mock para hacer pruebas de integracion",
-            value: request
+      a: {
+        summary: "Mock Ingresar cosecha de prueba.",
+        description: "Mock para hacer pruebas de integracion en controlador de cosechas",
+        value: {
+          /* your example data */
         },
-        b: {
-            summary: "Respuesta ingresar a ingresar variedad",
-            description: "Mock con contenido en base64",
-            value: cosechas
+      },
+      b: {
+        summary: "Respuesta ingresar a ingresar cosecha",
+        description: "Mock con contenido en base64",
+        value: {
+          /* your example data */
         },
-      //   c: {
-      //     summary: "Respuesta ingresar solicitud de documentos",
-      //     description: "Mock con respuesta del servicio",
-      //     value: responseIngresarDocumentosMock
-      // }
+      },
     }
   })
   @Post()
@@ -42,8 +40,14 @@ export class CosechasController {
     return this.cosechasService.create(createCosechaDto);
   }
 
+  @ApiResponse({
+    status: 201,
+    type: ResponseCosechaDto,
+  })
   @Get()
-  findAll() {
+  @ApiOperation({ summary: 'Respuesta cosechas' })
+  @UseInterceptors(CustomCacheInterceptor)
+  async findAll(): Promise<ResponseCosechaDto[]> {
     return this.cosechasService.findAll();
   }
 

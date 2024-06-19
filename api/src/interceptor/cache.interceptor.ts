@@ -1,16 +1,17 @@
-import {CallHandler, ExecutionContext, Injectable
-} from '@nestjs/common';
-import { CacheInterceptor, CACHE_KEY_METADATA, } from '@nestjs/cache-manager';
+import { CallHandler, ExecutionContext, Injectable, Inject } from '@nestjs/common';
+import { CacheInterceptor, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class CustomCacheInterceptor extends CacheInterceptor {
   intercept: (context: ExecutionContext, next: CallHandler) => Promise<Observable<any>>;
-  reflector: any;
+
   constructor(
-    cacheManager: any,
-    reflector: any,
+    @Inject(CACHE_MANAGER) cacheManager: Cache,
+    reflector: Reflector,
     private readonly configService: ConfigService,
   ) {
     super(cacheManager, reflector);
@@ -24,26 +25,26 @@ export class CustomCacheInterceptor extends CacheInterceptor {
   }
 
   /**
-   * Mofificar este metodo cuando sea necesario personalizar 
-   * las variables que quedan en cache.
+   * Modify this method when necessary to customize
+   * the variables that are cached.
    * @param context
    * @returns 
    */
   trackBy(context: ExecutionContext): string | undefined {
-      const request = context.switchToHttp().getRequest();
-      const { httpAdapter } = this.httpAdapterHost;
-  
-      const isGetRequest = httpAdapter.getRequestMethod(request) === 'GET';
-      const excludePaths = [
-        // Routes to be excluded
-      ];
-      if (
-        !isGetRequest ||
-        (isGetRequest &&
-          excludePaths.includes(httpAdapter.getRequestUrl(request)))
-      ) {
-        return undefined;
-      }
-      return httpAdapter.getRequestUrl(request);
+    const request = context.switchToHttp().getRequest();
+    const { httpAdapter } = this.httpAdapterHost;
+
+    const isGetRequest = httpAdapter.getRequestMethod(request) === 'GET';
+    const excludePaths = [
+      // Routes to be excluded
+    ];
+    if (
+      !isGetRequest ||
+      (isGetRequest &&
+        excludePaths.includes(httpAdapter.getRequestUrl(request)))
+    ) {
+      return undefined;
+    }
+    return httpAdapter.getRequestUrl(request);
   }
 }

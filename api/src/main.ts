@@ -69,6 +69,6 @@ async function bootstrap() {
   app.use(new CorrelationIdMiddleware().use);
   app.useGlobalFilters(new GlobalExceptionsFilters());
 
-  await app.listen(appConfig.APP_PORT);
+  await app.listen(appConfig.appPort);
 }
 bootstrap();

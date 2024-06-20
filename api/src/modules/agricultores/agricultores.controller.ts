@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Scope, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { AgricultoresService } from './agricultores.service';
 import { CreateAgricultoreDto } from './dto/create-agricultore.dto';
@@ -6,6 +6,7 @@ import { UpdateAgricultoreDto } from './dto/update-agricultore.dto';
 
 import { agricultores } from '../../mocks/agricultor.mock';
 import { request } from 'src/mocks/mock'
+import { TokenGuard } from 'src/guards/token.guard';
 @Controller({
   path: 'agricultores',
   scope: Scope.REQUEST,
@@ -36,26 +37,32 @@ export class AgricultoresController {
       // }
     }
   })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createAgricultoreDto: CreateAgricultoreDto) {
     return this.agricultoresService.create(createAgricultoreDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get()
   findAll() {
     return this.agricultoresService.findAll();
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.agricultoresService.findOne(+id);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAgricultoreDto: UpdateAgricultoreDto) {
     return this.agricultoresService.update(+id, updateAgricultoreDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.agricultoresService.remove(+id);

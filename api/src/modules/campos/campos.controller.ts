@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Scope, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { CamposService } from './campos.service';
 import { CreateCampoDto } from './dto/create-campo.dto';
@@ -6,6 +6,7 @@ import { UpdateCampoDto } from './dto/update-campo.dto';
 
 import { campos } from '../../mocks/campos.mock';
 import { request } from 'src/mocks/mock'
+import { TokenGuard } from 'src/guards/token.guard';
 
 @Controller({
   path: 'campos',
@@ -37,26 +38,32 @@ export class CamposController {
       // }
     }
   })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createCampoDto: CreateCampoDto) {
     return this.camposService.create(createCampoDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get()
   findAll() {
     return this.camposService.findAll();
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.camposService.findOne(+id);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCampoDto: UpdateCampoDto) {
     return this.camposService.update(+id, updateCampoDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.camposService.remove(+id);

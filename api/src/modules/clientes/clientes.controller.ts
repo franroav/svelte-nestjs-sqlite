@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Scope, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { ClientesService } from './clientes.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
@@ -7,6 +7,7 @@ import { UpdateClienteDto } from './dto/update-cliente.dto';
 
 import { clientes } from '../../mocks/clientes.mock';
 import { request } from 'src/mocks/mock'
+import { TokenGuard } from 'src/guards/token.guard';
 @Controller({
   path: 'clientes',
   scope: Scope.REQUEST,
@@ -37,26 +38,32 @@ export class ClientesController {
       // }
     }
   })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createClienteDto: CreateClienteDto) {
     return this.clientesService.create(createClienteDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get()
   findAll() {
     return this.clientesService.findAll();
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.clientesService.findOne(+id);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateClienteDto: UpdateClienteDto) {
     return this.clientesService.update(+id, updateClienteDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.clientesService.remove(+id);

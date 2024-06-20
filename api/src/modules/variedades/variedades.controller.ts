@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Scope, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { VariedadesService } from './variedades.service';
 import { CreateVariedadeDto } from './dto/create-variedade.dto';
@@ -6,6 +6,7 @@ import { UpdateVariedadeDto } from './dto/update-variedade.dto';
 
 import { variedades } from 'src/mocks/variedades.mock';
 import { request } from 'src/mocks/mock'
+import { TokenGuard } from 'src/guards/token.guard';
 
 @Controller({
   path: 'variedades',
@@ -37,6 +38,8 @@ export class VariedadesController {
       // }
     }
   })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createVariedadeDto: CreateVariedadeDto) {
     return this.variedadesService.create(createVariedadeDto);
@@ -46,21 +49,26 @@ export class VariedadesController {
     status: 201,
     type: variedades,
   })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get()
   findAll() {
     return this.variedadesService.findAll();
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.variedadesService.findOne(+id);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateVariedadeDto: UpdateVariedadeDto) {
     return this.variedadesService.update(+id, updateVariedadeDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.variedadesService.remove(+id);

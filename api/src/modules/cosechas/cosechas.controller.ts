@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseInterceptors } from '@nestjs/common';
-import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseInterceptors, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CosechasService } from './cosechas.service';
 import { CreateCosechaDto } from './dto/request/create-cosecha.dto';
 import { UpdateCosechaDto } from './dto/request/update-cosecha.dto';
 import { ResponseCosechaDto } from './dto/response/response-cosecha.dto';
 import { CustomCacheInterceptor } from '../../interceptor/cache.interceptor';
+import { TokenGuard } from 'src/guards/token.guard';
 
 @Controller({
   path: 'cosechas',
@@ -35,6 +36,8 @@ export class CosechasController {
       },
     }
   })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createCosechaDto: CreateCosechaDto) {
     return this.cosechasService.create(createCosechaDto);
@@ -50,17 +53,20 @@ export class CosechasController {
   async findAll(): Promise<ResponseCosechaDto[]> {
     return this.cosechasService.findAll();
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.cosechasService.findOne(+id);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCosechaDto: UpdateCosechaDto) {
     return this.cosechasService.update(+id, updateCosechaDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.cosechasService.remove(+id);

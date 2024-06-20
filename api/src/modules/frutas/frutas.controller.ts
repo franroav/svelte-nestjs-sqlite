@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Scope, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { FrutasService } from './frutas.service';
 import { CreateFrutaDto } from './dto/create-fruta.dto';
@@ -6,6 +6,7 @@ import { UpdateFrutaDto } from './dto/update-fruta.dto';
 
 import { frutas } from '../../mocks/frutas.mock';
 import { request } from 'src/mocks/mock'
+import { TokenGuard } from 'src/guards/token.guard';
 @Controller({
   path: 'frutas',
   scope: Scope.REQUEST,
@@ -31,6 +32,8 @@ export class FrutasController {
         },
     }
   })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createFrutaDto: CreateFrutaDto) {
     return this.frutasService.create(createFrutaDto);
@@ -40,21 +43,26 @@ export class FrutasController {
   //   status: 201,
   //   type: ApiResponseFrutas,
   // })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get()
   findAll() {
     return this.frutasService.findAll();
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.frutasService.findOne(+id);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateFrutaDto: UpdateFrutaDto) {
     return this.frutasService.update(+id, updateFrutaDto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.frutasService.remove(+id);

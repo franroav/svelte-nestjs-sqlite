@@ -17,7 +17,7 @@ import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware'
 
 async function bootstrap() {
   const env = process.env.ENV || 'production';
-  const port = 3000;
+  const port = process.env.APP_PORT || 3000;
   const app = await NestFactory.create(AppModule);
   const appConfig = app.get(AppConfigService);
 

@@ -9,6 +9,7 @@ import { ClientesModule } from './modules/clientes/clientes.module';
 import { dataBaseConfig } from './database/database.config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { VariedadesModule } from './modules/variedades/variedades.module';
+import { PrometheusModule } from './modules/prometheus/prometheus.module';
 import { CamposModule } from './modules/campos/campos.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
@@ -20,6 +21,7 @@ import { AppConfigModule } from './config/config-nestjs.module';
 import { CustomCacheInterceptor } from './interceptor/cache.interceptor';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware';
+
 
 @Module({
   imports: [
@@ -34,6 +36,7 @@ import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware'
     SequelizeModule.forRoot(dataBaseConfig),
     CsvModule,
     MulterModule,
+    PrometheusModule, 
     CacheModule.register({
       ttl: 5, // seconds
       max: 10, // maximum number of items in cache

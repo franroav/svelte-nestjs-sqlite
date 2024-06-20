@@ -16,8 +16,6 @@ import csurf from 'csurf';
 import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware';
 
 async function bootstrap() {
-  const env = process.env.ENV || 'production';
-  const port = process.env.APP_PORT || 3000;
   const app = await NestFactory.create(AppModule);
   const appConfig = app.get(AppConfigService);
 
@@ -55,7 +53,6 @@ async function bootstrap() {
   // database
   if (appConfig.appActiveDatabase) {
     const sequelize = app.get(Sequelize);
-
     try {
       await seedDatabase(sequelize);
     } catch (error) {
@@ -72,6 +69,6 @@ async function bootstrap() {
   app.use(new CorrelationIdMiddleware().use);
   app.useGlobalFilters(new GlobalExceptionsFilters());
 
-  await app.listen(port);
+  await app.listen(appConfig.APP_PORT);
 }
 bootstrap();

@@ -50,7 +50,9 @@ async function bootstrap() {
 
   // Security middlewares
   app.use(helmet());
-  app.use(csurf());
+  // app.use(csurf());
+  // Apply other global middlewares and filters
+  // app.use(new CorrelationIdMiddleware().use);
 
   // Register fastify-rate-limit
   // app.register(fastifyRateLimit, {
@@ -59,12 +61,12 @@ async function bootstrap() {
   // });
   
  // Register express-rate-limit
-  app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
-    }),
-  );
+  // app.use(
+  //   rateLimit({
+  //     windowMs: 15 * 60 * 1000, // 15 minutes
+  //     max: 100, // limit each IP to 100 requests per windowMs
+  //   }),
+  // );
 
   // versioning
   app.enableVersioning({
@@ -110,8 +112,7 @@ async function bootstrap() {
   // Apply the DTO validation Pipe
   app.useGlobalPipes(new ValidationPipe());
 
-  // Apply other global middlewares and filters
-  app.use(new CorrelationIdMiddleware().use);
+
   app.useGlobalFilters(new GlobalExceptionsFilters());
 
   await app.listen(appConfig.appPort);

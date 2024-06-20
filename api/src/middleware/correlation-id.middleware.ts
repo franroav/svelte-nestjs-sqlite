@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 
@@ -6,10 +6,10 @@ export const CORRELATION_ID_KEY = 'X-Request-Id';
 
 @Injectable()
 export class CorrelationIdMiddleware implements NestMiddleware {
-  use(req: any, res: any, next: NextFunction) {
-    const correlationHeader = req.header(CORRELATION_ID_KEY) || randomUUID();
+  use(req: FastifyRequest, reply: FastifyReply, next: () => void) {
+    const correlationHeader = req.headers[CORRELATION_ID_KEY] || randomUUID();
+    reply.header(CORRELATION_ID_KEY, correlationHeader);
     req.headers[CORRELATION_ID_KEY] = correlationHeader;
-    res.set(CORRELATION_ID_KEY, correlationHeader);
     next();
   }
 }

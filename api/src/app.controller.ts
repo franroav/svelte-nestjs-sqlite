@@ -1,12 +1,13 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Scope, UseGuards } from '@nestjs/common';
 import * as fs from 'fs';
 import { createReadStream } from 'fs';
 import { CsvParser } from 'nest-csv-parser';
 import { Readable } from 'stream';
 import { AppService } from './app.service';
-import { ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiBearerAuth, } from '@nestjs/swagger';
+import { TokenGuard } from './guards/token.guard';
 
-@Controller()
+@Controller({  scope: Scope.REQUEST,})
 export class AppController {
   constructor(private readonly appService: AppService) {}
 }
@@ -18,6 +19,8 @@ export class UploadController {
     private readonly csvParser: CsvParser
   ) {}
 
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @Get('import')
   @ApiOperation({ summary: 'Ingresar ruta de documento csv' })
   @ApiQuery({ name: 'csvPath', type: String, required: true, example: "./uploads/csv/cosechas.csv" })
@@ -43,9 +46,9 @@ export class UploadController {
       // Reset the stream to start from the beginning
       stream.close();
       const resetStream = createReadStream(csvPath);
-      console.log("resetStream ", resetStream);
+      // console.log("resetStream ", resetStream);
       const entities = await this.csvParser.parse(resetStream, GenericDto);
-      console.log("Parsed Entities =>", entities.list);
+      // console.log("Parsed Entities =>", entities.list);
       // this.appService.updateFileIntoDb(entities.list);
       return this.appService.updateFileIntoDb(entities.list);
     } catch (error) {

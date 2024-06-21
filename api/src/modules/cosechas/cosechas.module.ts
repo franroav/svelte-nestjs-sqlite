@@ -6,13 +6,13 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { CacheModule } from '@nestjs/cache-manager';
 import { JwtService } from '@nestjs/jwt';
 import { JwtModule } from '@nestjs/jwt';
-
+import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
 @Module({
   imports: [SequelizeModule.forFeature([Cosecha]), CacheModule.register(),    JwtModule.register({
     secret: process.env.JWT_SECRET || 'default_secret',
     signOptions: { expiresIn: '60m' },
   }) ],
   controllers: [CosechasController],
-  providers: [CosechasService, JwtService],
+  providers: [CosechasService, JwtService, TransactionLogsService],
 })
 export class CosechasModule {}

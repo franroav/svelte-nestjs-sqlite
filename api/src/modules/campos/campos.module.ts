@@ -5,6 +5,7 @@ import { Campo } from './entities/campo.entity';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { JwtService } from '@nestjs/jwt';
 import { JwtModule } from '@nestjs/jwt';
+import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
 
 @Module({
   imports: [SequelizeModule.forFeature([Campo]),     JwtModule.register({
@@ -12,7 +13,7 @@ import { JwtModule } from '@nestjs/jwt';
     signOptions: { expiresIn: '60m' },
   })],
   controllers: [CamposController],
-  providers: [CamposService, JwtService],
+  providers: [CamposService, JwtService, TransactionLogsService],
   exports: [CamposService],
 })
 export class CamposModule {}

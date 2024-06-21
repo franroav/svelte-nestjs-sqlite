@@ -5,6 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Agricultor } from './entities/agricultore.entity';
 import { JwtService } from '@nestjs/jwt';
 import { JwtModule } from '@nestjs/jwt';
+import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
 
 @Module({
   imports: [SequelizeModule.forFeature([Agricultor]),     JwtModule.register({
@@ -12,7 +13,7 @@ import { JwtModule } from '@nestjs/jwt';
     signOptions: { expiresIn: '60m' },
   })],
   controllers: [AgricultoresController],
-  providers: [AgricultoresService, JwtService],
+  providers: [AgricultoresService, JwtService, TransactionLogsService],
   exports: [AgricultoresService],
 })
 export class AgricultoresModule {}

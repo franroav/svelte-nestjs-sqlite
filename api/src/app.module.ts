@@ -1,5 +1,10 @@
-import { Module, MiddlewareConsumer, NestModule, RequestMethod} from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import {
+  Module,
+  MiddlewareConsumer,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
+import { APP_FILTER, APP_INTERCEPTOR, HttpAdapterHost } from '@nestjs/core';
 import { AppController, UploadController } from './app.controller';
 import { AppService } from './app.service';
 import { FrutasModule } from './modules/frutas/frutas.module';
@@ -19,18 +24,29 @@ import { AppConfigService } from './config/configuration.service';
 import { AppConfigModule } from './config/config-nestjs.module';
 import { CustomCacheInterceptor } from './interceptor/cache.interceptor';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GlobalExceptionsFilters } from './filters/global-exception.filter';
+import { TransactionLogsModule } from './modules/transaction-logs/transaction-logs.module';
 // import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware'; // Import correlation Middleware
 import { JwtModule } from '@nestjs/jwt';
 import { TokenGuard } from './guards/token.guard'; // Import your TokenGuard class
 // import { CsrfMiddleware } from './middleware/csrf.middleware'; // Import CsrfMiddleware
 
-
 @Module({
   imports: [
-    JwtModule.register({
-      secret: 'your_secret_key', // Example: Replace with your actual secret key
-      signOptions: { expiresIn: '1h' }, // Example: Adjust options as per your needs
+    ConfigModule.forRoot(),  // Load .env file
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
+      inject: [ConfigService],
     }),
+    // JwtModule.register({
+    //   secret: process.env.JWT_SECRET || 'default_secret',
+    //   signOptions: { expiresIn: '60m' },
+    // }),
     AppConfigModule,
     LoggerModule.forRoot(),
     FrutasModule,
@@ -42,7 +58,8 @@ import { TokenGuard } from './guards/token.guard'; // Import your TokenGuard cla
     SequelizeModule.forRoot(dataBaseConfig),
     CsvModule,
     MulterModule,
-    PrometheusModule, 
+    PrometheusModule,
+    TransactionLogsModule,
     CacheModule.register({
       ttl: 5, // seconds
       max: 10, // maximum number of items in cache
@@ -57,11 +74,17 @@ import { TokenGuard } from './guards/token.guard'; // Import your TokenGuard cla
       provide: APP_INTERCEPTOR,
       useClass: CustomCacheInterceptor,
     },
-    TokenGuard
+    {
+      provide: APP_FILTER,
+      useFactory: (httpAdapterHost: HttpAdapterHost) => {
+        return new GlobalExceptionsFilters(httpAdapterHost);
+      },
+      inject: [HttpAdapterHost],
+    },
+    TokenGuard,
   ],
   exports: [AppConfigService],
 })
-
 export class AppModule {}
 
 // export class AppModule {

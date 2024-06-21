@@ -6,7 +6,7 @@ import { UpdateFrutaDto } from './dto/update-fruta.dto';
 
 import { frutas } from '../../mocks/frutas.mock';
 import { request } from 'src/mocks/mock'
-import { TokenGuard } from 'src/guards/token.guard';
+import { TokenGuard } from '../../guards/token.guard';
 @Controller({
   path: 'frutas',
   scope: Scope.REQUEST,

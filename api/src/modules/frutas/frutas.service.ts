@@ -4,13 +4,20 @@ import { CreateFrutaDto } from './dto/create-fruta.dto';
 import { UpdateFrutaDto } from './dto/update-fruta.dto';
 import { Fruta } from './entities/fruta.entity';
 import { InjectModel } from '@nestjs/sequelize';
+import { AtributoLogEntity } from '../transaction-logs/entities/atributo-log.entity';
+import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
 
 @Injectable()
 export class FrutasService {
+  
   constructor(
     @InjectModel(Fruta)
     private frutaRepository: typeof Fruta,
+    private readonly transactionLogsService: TransactionLogsService,
   ) {}
+
+  private readonly CODIGO_SERVICIO: string = 'X';
+  private readonly SERVICIO: string = `Servicio - ${FrutasService.name}`;
 
   findByName(nombre: string) {
     return this.frutaRepository.findOne({ where: { nombre } });
@@ -24,6 +31,15 @@ export class FrutasService {
     return this.frutaRepository.create(createFrutaDto as any);
   }
   findAll() {
+    const atributoLogEntity = new AtributoLogEntity();
+    atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
+    atributoLogEntity.codigo = this.CODIGO_SERVICIO;
+    atributoLogEntity.titulo = 'consulta_fruta';
+    atributoLogEntity.lugar = `${this.SERVICIO} - Método Listar Frutas()`;
+    atributoLogEntity.inicio = Date.now();
+    atributoLogEntity.respuesta = `Consulta de listar Frutas obtenidas correctamente - Status: ${HttpStatus.OK}`;
+    atributoLogEntity.estado = '1';
+    this.transactionLogsService.transactionLogs(atributoLogEntity);
     return this.frutaRepository.findAll();
   }
 

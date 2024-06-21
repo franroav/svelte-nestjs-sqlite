@@ -6,7 +6,7 @@ import { UpdateCampoDto } from './dto/update-campo.dto';
 
 import { campos } from '../../mocks/campos.mock';
 import { request } from 'src/mocks/mock'
-import { TokenGuard } from 'src/guards/token.guard';
+import { TokenGuard } from '../../guards/token.guard';
 
 @Controller({
   path: 'campos',

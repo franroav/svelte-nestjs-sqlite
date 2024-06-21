@@ -4,9 +4,13 @@ import { AgricultoresController } from './agricultores.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Agricultor } from './entities/agricultore.entity';
 import { JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Agricultor])],
+  imports: [SequelizeModule.forFeature([Agricultor]),     JwtModule.register({
+    secret: process.env.JWT_SECRET || 'default_secret',
+    signOptions: { expiresIn: '60m' },
+  })],
   controllers: [AgricultoresController],
   providers: [AgricultoresService, JwtService],
   exports: [AgricultoresService],

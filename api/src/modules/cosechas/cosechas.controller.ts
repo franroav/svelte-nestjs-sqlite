@@ -5,7 +5,7 @@ import { CreateCosechaDto } from './dto/request/create-cosecha.dto';
 import { UpdateCosechaDto } from './dto/request/update-cosecha.dto';
 import { ResponseCosechaDto } from './dto/response/response-cosecha.dto';
 import { CustomCacheInterceptor } from '../../interceptor/cache.interceptor';
-import { TokenGuard } from 'src/guards/token.guard';
+import { TokenGuard } from '../../guards/token.guard';
 
 @Controller({
   path: 'cosechas',
@@ -43,19 +43,25 @@ export class CosechasController {
     return this.cosechasService.create(createCosechaDto);
   }
 
+  
   @ApiResponse({
     status: 201,
     type: ResponseCosechaDto,
   })
+
   @Get()
   @ApiOperation({ summary: 'Respuesta cosechas' })
+  @ApiBearerAuth()
+  @UseGuards(TokenGuard)
   @UseInterceptors(CustomCacheInterceptor)
   async findAll(): Promise<ResponseCosechaDto[]> {
     return this.cosechasService.findAll();
   }
+
+
+  @Get(':id')
   @ApiBearerAuth()
   @UseGuards(TokenGuard)
-  @Get(':id')
   findOne(@Param('id') id: string) {
     return this.cosechasService.findOne(+id);
   }

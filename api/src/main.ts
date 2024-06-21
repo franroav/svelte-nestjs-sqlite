@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Sequelize } from 'sequelize-typescript';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -112,9 +112,9 @@ async function bootstrap() {
 
   // Apply the DTO validation Pipe
   app.useGlobalPipes(new ValidationPipe());
-
-
-  app.useGlobalFilters(new GlobalExceptionsFilters());
+// Retrieve HttpAdapterHost and provide it to GlobalExceptionsFilters
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new GlobalExceptionsFilters(httpAdapterHost));
 
   await app.listen(appConfig.appPort);
 }

@@ -6,7 +6,7 @@ import { UpdateAgricultoreDto } from './dto/update-agricultore.dto';
 
 import { agricultores } from '../../mocks/agricultor.mock';
 import { request } from 'src/mocks/mock'
-import { TokenGuard } from 'src/guards/token.guard';
+import { TokenGuard } from '../../guards/token.guard';
 @Controller({
   path: 'agricultores',
   scope: Scope.REQUEST,

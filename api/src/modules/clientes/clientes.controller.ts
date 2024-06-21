@@ -7,7 +7,7 @@ import { UpdateClienteDto } from './dto/update-cliente.dto';
 
 import { clientes } from '../../mocks/clientes.mock';
 import { request } from 'src/mocks/mock'
-import { TokenGuard } from 'src/guards/token.guard';
+import { TokenGuard } from '../../guards/token.guard';
 @Controller({
   path: 'clientes',
   scope: Scope.REQUEST,

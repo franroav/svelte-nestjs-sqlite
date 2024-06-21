@@ -6,7 +6,7 @@ import { UpdateVariedadeDto } from './dto/update-variedade.dto';
 
 import { variedades } from 'src/mocks/variedades.mock';
 import { request } from 'src/mocks/mock'
-import { TokenGuard } from 'src/guards/token.guard';
+import { TokenGuard } from '../../guards/token.guard';
 
 @Controller({
   path: 'variedades',

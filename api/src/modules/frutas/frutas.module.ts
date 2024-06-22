@@ -14,6 +14,6 @@ import { TransactionLogsService } from '../transaction-logs/services/transaction
   })],
   controllers: [FrutasController],
   providers: [FrutasService, JwtService, TransactionLogsService],
-  exports: [FrutasService],
+  exports: [FrutasService, SequelizeModule],
 })
 export class FrutasModule {}

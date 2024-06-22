@@ -1,11 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Scope, Param, Delete, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Scope,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiExtraModels,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { VariedadesService } from './variedades.service';
 import { CreateVariedadeDto } from './dto/create-variedade.dto';
 import { UpdateVariedadeDto } from './dto/update-variedade.dto';
 
 import { variedades } from 'src/mocks/variedades.mock';
-import { request } from 'src/mocks/mock'
+import { request } from 'src/mocks/mock';
 import { TokenGuard } from '../../guards/token.guard';
 
 @Controller({
@@ -19,28 +38,29 @@ export class VariedadesController {
   @ApiOperation({ summary: 'Ingresar Varidades' })
   @ApiBody({
     type: CreateVariedadeDto,
-    description: "Ingresar variedades.",
+    description: 'Ingresar variedades.',
     examples: {
-        a: {
-            summary: "Mock Ingresar variedad de prueba.",
-            description: "Mock para hacer pruebas de integracion",
-            value: request
+      a: {
+        summary: 'Mock Ingresar variedad de prueba.',
+        description: 'Mock para hacer pruebas de integracion',
+        value: {
+          nombre: 'fruta numero 9',
+          frutaId: 9,
         },
-        b: {
-            summary: "Respuesta ingresar a ingresar variedad",
-            description: "Mock con contenido en base64",
-            value: variedades
-        },
+      },
       //   c: {
       //     summary: "Respuesta ingresar solicitud de documentos",
       //     description: "Mock con respuesta del servicio",
       //     value: responseIngresarDocumentosMock
       // }
-    }
+    },
   })
   @ApiBearerAuth()
   @UseGuards(TokenGuard)
   @Post()
+  @ApiOperation({ summary: 'Create a new variedad' })
+  @ApiResponse({ status: 201, description: 'Variedad successfully created.' })
+  @ApiResponse({ status: 409, description: 'Variedad with this name already exists.' })
   create(@Body() createVariedadeDto: CreateVariedadeDto) {
     return this.variedadesService.create(createVariedadeDto);
   }
@@ -64,7 +84,10 @@ export class VariedadesController {
   @ApiBearerAuth()
   @UseGuards(TokenGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVariedadeDto: UpdateVariedadeDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateVariedadeDto: UpdateVariedadeDto,
+  ) {
     return this.variedadesService.update(+id, updateVariedadeDto);
   }
   @ApiBearerAuth()

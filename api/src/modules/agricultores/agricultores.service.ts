@@ -5,6 +5,7 @@ import { Agricultor } from './entities/agricultore.entity';
 import { InjectModel } from '@nestjs/sequelize';
 import { AtributoLogEntity } from '../transaction-logs/entities/atributo-log.entity';
 import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
+import { Utils } from '../../helpers/utils.helper';
 @Injectable()
 export class AgricultoresService {
   constructor(
@@ -21,6 +22,7 @@ export class AgricultoresService {
   }
 
   async create(createAgricultorDto: CreateAgricultoreDto) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -40,7 +42,8 @@ export class AgricultoresService {
       atributoLogEntity.respuesta = `El agricultor ha sido creada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.agricultorRepository.create(createAgricultorDto as any);
+      const data = await this.agricultorRepository.create(createAgricultorDto as any);
+      return utils.templateResponse(data, HttpStatus.OK, `El agricultor ha sido creada correctamente - Status: ${HttpStatus.OK}`,`${this.SERVICIO} - Método Crear agricultor()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -52,7 +55,8 @@ export class AgricultoresService {
 
   }
 
-  findAll() {
+  async findAll() {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -64,7 +68,8 @@ export class AgricultoresService {
       atributoLogEntity.respuesta = `Consulta de listar agricultores obtenida correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.agricultorRepository.findAll();
+      const data = await this.agricultorRepository.findAll();
+      return utils.templateResponse(data, HttpStatus.OK, `Consulta de listar agricultores obtenida correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método Listar agricultores()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -77,7 +82,8 @@ export class AgricultoresService {
 
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -89,7 +95,9 @@ export class AgricultoresService {
       atributoLogEntity.respuesta = `Consulta de agricultor ${id} obtenida correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.agricultorRepository.findByPk(id);
+      const data = await this.agricultorRepository.findByPk(id);
+      return utils.templateResponse(data, HttpStatus.OK, `Consulta de agricultor ${id} obtenida correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método buscar agricultor()`);
+      
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -100,7 +108,8 @@ export class AgricultoresService {
     }
   }
 
-  update(id: number, updateAgricultorDto: UpdateAgricultoreDto) {
+  async update(id: number, updateAgricultorDto: UpdateAgricultoreDto) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -112,7 +121,8 @@ export class AgricultoresService {
       atributoLogEntity.respuesta = `Actualizar agricultor ${id} guardado correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.agricultorRepository.update(updateAgricultorDto as any, { where: { id } });
+      const data = await this.agricultorRepository.update(updateAgricultorDto as any, { where: { id } });
+      return utils.templateResponse(data, HttpStatus.OK,  `Actualizar agricultor ${id} guardado correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método actualizar agricultor()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -124,7 +134,8 @@ export class AgricultoresService {
    
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -136,7 +147,8 @@ export class AgricultoresService {
       atributoLogEntity.respuesta = `El agricultor ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.agricultorRepository.destroy({ where: { id } });
+      const data = await this.agricultorRepository.destroy({ where: { id } });
+      return utils.templateResponse(data, HttpStatus.OK, `El agricultor ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método eliminar agricultor()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;

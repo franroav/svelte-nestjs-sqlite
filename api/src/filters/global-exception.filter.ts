@@ -27,12 +27,13 @@ export class GlobalExceptionsFilters implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const responseBody = exception.getResponse();
-
+      
       if (typeof responseBody === 'object') {
         details = responseBody;
         error = responseBody['error'] || error;
         message = responseBody['message'] || message;
       } else {
+        details = responseBody;
         message = exception.message;
       }
 

@@ -5,7 +5,7 @@ import { Fruta } from './entities/fruta.entity';
 import { InjectModel } from '@nestjs/sequelize';
 import { AtributoLogEntity } from '../transaction-logs/entities/atributo-log.entity';
 import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
-
+import { Utils } from '../../helpers/utils.helper';
 @Injectable()
 export class FrutasService {
   constructor(
@@ -22,6 +22,7 @@ export class FrutasService {
   }
 
   async create(createFrutaDto: CreateFrutaDto) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -44,7 +45,9 @@ export class FrutasService {
       atributoLogEntity.respuesta = `La fruta ha sido creada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.frutaRepository.create(createFrutaDto as any);
+      const data = await this.frutaRepository.create(createFrutaDto as any)
+      return utils.templateResponse(data, HttpStatus.OK, `La fruta ha sido creada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método Crear Fruta()`);
+      // return this.frutaRepository.create(createFrutaDto as any);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -54,7 +57,8 @@ export class FrutasService {
       throw new HttpException(error.message, status);
     }
   }
-  findAll() {
+ async findAll() {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -66,7 +70,8 @@ export class FrutasService {
       atributoLogEntity.respuesta = `Consulta de listar Frutas obtenidas correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.frutaRepository.findAll();
+      const data = await this.frutaRepository.findAll()
+      return utils.templateResponse(data, HttpStatus.OK, `Consulta de listar Frutas obtenidas correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método Listar Frutas()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -77,7 +82,8 @@ export class FrutasService {
     }
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -89,7 +95,8 @@ export class FrutasService {
       atributoLogEntity.respuesta = `Consulta de Fruta ${id} obtenida correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.frutaRepository.findByPk(id);
+      const data = await this.frutaRepository.findByPk(id);
+      return utils.templateResponse(data, HttpStatus.OK, `Consulta de Fruta ${id} obtenida correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método buscar Fruta()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -100,7 +107,8 @@ export class FrutasService {
     }
   }
 
-  update(id: number, updateFrutaDto: UpdateFrutaDto) {
+ async update(id: number, updateFrutaDto: UpdateFrutaDto) {
+  const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -112,9 +120,11 @@ export class FrutasService {
       atributoLogEntity.respuesta = `Actualizar Fruta ${id} guardada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.frutaRepository.update(updateFrutaDto as any, {
+      const data = await this.frutaRepository.update(updateFrutaDto as any, {
         where: { id },
       });
+      return utils.templateResponse(data, HttpStatus.OK, `Actualizar Fruta ${id} guardada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método actualizar Fruta()`);
+      
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -125,7 +135,8 @@ export class FrutasService {
     }
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -137,7 +148,8 @@ export class FrutasService {
       atributoLogEntity.respuesta = `La Fruta ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.frutaRepository.destroy({ where: { id } });
+      const data = await this.frutaRepository.destroy({ where: { id } });
+      return utils.templateResponse(data, HttpStatus.OK, `La Fruta ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método eliminar Fruta()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;

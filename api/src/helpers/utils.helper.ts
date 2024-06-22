@@ -4,9 +4,17 @@ export class Utils {
   objectValidationSql(object: any): { isValid: any; message: any; } {
     throw new Error('Method not implemented.');
   }
-  dtoValidationErrorMessage(errors: import("class-validator").ValidationError[]) {
-    throw new Error('Method not implemented.');
+
+  static dtoValidationErrorMessage(errors: any[]): string {
+    return errors
+      .map(err => {
+        return `${err.property} - ${Object.values(err.constraints).join(', ')}`;
+      })
+      .join('; ');
   }
+  // dtoValidationErrorMessage(errors: import("class-validator").ValidationError[]) {
+  //   throw new Error('Method not implemented.');
+  // }
 
   data_log(
     codigo: number,
@@ -29,6 +37,18 @@ export class Utils {
     } else {
       return Logger.error(JSON.stringify(body));
     }
+  }
+
+  async templateResponse(data: any, code: any, message: any, path: string) {
+    let response: any = {} 
+    // const { code, message } = data;
+    // const response = new ConsultaGenericaResponseDto();
+    response.statusCode = code;
+    response.message = message;
+    response.data = data;
+    response.timestamp = Date.now()
+    response.path = path
+    return response;
   }
 
 }

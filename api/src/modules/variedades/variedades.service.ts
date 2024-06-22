@@ -2,16 +2,19 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateVariedadeDto } from './dto/create-variedade.dto';
 import { UpdateVariedadeDto } from './dto/update-variedade.dto';
 import { Variedad } from './entities/variedade.entity';
+import { Fruta } from '../frutas/entities/fruta.entity'; // Import the Fruta entity
 import { InjectModel } from '@nestjs/sequelize';
 import { AtributoLogEntity } from '../transaction-logs/entities/atributo-log.entity';
 import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
-
+import { Utils } from '../../helpers/utils.helper';
 @Injectable()
 export class VariedadesService {
   constructor(
     @InjectModel(Variedad)
     private variedadeRepository: typeof Variedad,
     private readonly transactionLogsService: TransactionLogsService,
+    @InjectModel(Fruta)
+    private readonly frutaModel: typeof Fruta, // Inject the Fruta model
   ) {}
 
   private readonly CODIGO_SERVICIO: string = 'X';
@@ -22,6 +25,8 @@ export class VariedadesService {
   }
 
   async create(createVariedadeDto: CreateVariedadeDto) {
+    const utils = new Utils();
+    const { nombre, frutaId } = createVariedadeDto;
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -39,11 +44,21 @@ export class VariedadesService {
       );
     }
 
+    // Check if the Fruta with the given ID exists
+    const existingFruta = await this.frutaModel.findByPk(frutaId);
+    if (!existingFruta) {
+      throw new HttpException(
+        'Fruta with this ID does not exist',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     try {
-      atributoLogEntity.respuesta = `La Variedad ha sido creada correctamente - Status: ${HttpStatus.OK}`;
+      atributoLogEntity.respuesta = `Respuesta Controlada: La Variedad ha sido creada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.variedadeRepository.create(createVariedadeDto as any);
+      const data = await this.variedadeRepository.create(createVariedadeDto as any);
+      return utils.templateResponse(data, HttpStatus.OK, `Respuesta Controlada: La Variedad ha sido creada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método Crear Variedad()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -54,7 +69,8 @@ export class VariedadesService {
     }
   }
 
-  findAll() {
+  async findAll() {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -66,7 +82,8 @@ export class VariedadesService {
       atributoLogEntity.respuesta = `Consulta de listar Variedades obtenidas correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.variedadeRepository.findAll();
+      const data = await this.variedadeRepository.findAll();
+      return utils.templateResponse(data, HttpStatus.OK,  `Consulta de listar Variedades obtenidas correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método Listar Variedades()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -77,7 +94,8 @@ export class VariedadesService {
     }
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -89,7 +107,8 @@ export class VariedadesService {
       atributoLogEntity.respuesta = `Consulta de Variedad ${id} obtenida correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.variedadeRepository.findByPk(id);
+      const data = await this.variedadeRepository.findByPk(id);
+      return utils.templateResponse(data, HttpStatus.OK, `Consulta de Variedad ${id} obtenida correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método buscar Variedad()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -100,7 +119,8 @@ export class VariedadesService {
     }
   }
 
-  update(id: number, updateVariedadeDto: UpdateVariedadeDto) {
+  async update(id: number, updateVariedadeDto: UpdateVariedadeDto) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -112,9 +132,10 @@ export class VariedadesService {
       atributoLogEntity.respuesta = `Actualizar Variedad ${id} guardada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.variedadeRepository.update(updateVariedadeDto as any, {
+      const data = await this.variedadeRepository.update(updateVariedadeDto as any, {
         where: { id },
       });
+      return utils.templateResponse(data, HttpStatus.OK,  `Actualizar Variedad ${id} guardada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método actualizar Variedad()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -125,7 +146,8 @@ export class VariedadesService {
     }
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -137,7 +159,8 @@ export class VariedadesService {
       atributoLogEntity.respuesta = `La Variedad ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.variedadeRepository.destroy({ where: { id } });
+      const data = await this.variedadeRepository.destroy({ where: { id } });
+      return utils.templateResponse(data, HttpStatus.OK,  `La Variedad ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método eliminar Variedad()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;

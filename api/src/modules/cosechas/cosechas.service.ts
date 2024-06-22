@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { ResponseCosechaDto } from './dto/response/response-cosecha.dto';
 import { AtributoLogEntity } from '../transaction-logs/entities/atributo-log.entity';
 import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
+import { Utils } from '../../helpers/utils.helper';
 
 
 @Injectable()
@@ -24,6 +25,7 @@ export class CosechasService {
   // }
 
   async create(createCosechaDto: CreateCosechaDto): Promise<Cosecha> {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -53,8 +55,9 @@ export class CosechasService {
         fechaCosecha,
         cantidad,
       });
-  
-      return cosecha;
+
+      const data = cosecha
+      return utils.templateResponse(data, HttpStatus.OK,  `Respuesta Controlada: La cosecha ha sido creada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método Crear cosecha()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -67,6 +70,7 @@ export class CosechasService {
   }
 
   async findAll(): Promise<ResponseCosechaDto[]> {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -78,8 +82,8 @@ export class CosechasService {
       atributoLogEntity.respuesta = `Consulta de listar cosechas obtenidas correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      const cosechas = await this.cosechaRepository.findAll();
-      return cosechas.map((cosecha) => ({
+      let cosechas = await this.cosechaRepository.findAll();
+      cosechas.map((cosecha) => ({
         id: cosecha.id,
         frutaId: cosecha.frutaId,
         variedadeId: cosecha.variedadeId,
@@ -90,6 +94,9 @@ export class CosechasService {
         createdAt: cosecha.createdAt,
         updatedAt: cosecha.updatedAt,
       }));
+
+      const data = cosechas
+      return utils.templateResponse(data, HttpStatus.OK, `Consulta de listar cosechas obtenidas correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método Listar cosechas()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -101,7 +108,8 @@ export class CosechasService {
 
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -113,7 +121,8 @@ export class CosechasService {
       atributoLogEntity.respuesta = `Consulta de cosecha ${id} obtenida correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.cosechaRepository.findByPk(id);
+      const data = await this.cosechaRepository.findByPk(id);
+      return utils.templateResponse(data, HttpStatus.OK,  `Actualizar agricultor ${id} guardado correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método actualizar agricultor()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -125,7 +134,8 @@ export class CosechasService {
     
   }
 
-  update(id: number, updateCosechaDto: UpdateCosechaDto) {
+  async update(id: number, updateCosechaDto: UpdateCosechaDto) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -137,9 +147,10 @@ export class CosechasService {
       atributoLogEntity.respuesta = `Actualizar cosecha ${id} guardada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.cosechaRepository.update(updateCosechaDto as any, {
+      const data = await this.cosechaRepository.update(updateCosechaDto as any, {
         where: { id },
       });
+      return utils.templateResponse(data, HttpStatus.OK,  `Actualizar agricultor ${id} guardado correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método actualizar agricultor()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -151,7 +162,8 @@ export class CosechasService {
 
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -163,7 +175,8 @@ export class CosechasService {
       atributoLogEntity.respuesta = `La cosecha ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.cosechaRepository.destroy({ where: { id } });
+      const data = await this.cosechaRepository.destroy({ where: { id } });
+      return utils.templateResponse(data, HttpStatus.OK,  `La cosecha ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método eliminar cosecha()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;

@@ -5,7 +5,7 @@ import { Cliente } from './entities/cliente.entity';
 import { InjectModel } from '@nestjs/sequelize';
 import { AtributoLogEntity } from '../transaction-logs/entities/atributo-log.entity';
 import { TransactionLogsService } from '../transaction-logs/services/transaction-logs.service';
-
+import { Utils } from '../../helpers/utils.helper';
 @Injectable()
 export class ClientesService {
   constructor(
@@ -23,6 +23,7 @@ export class ClientesService {
 
 
   async create(createClienteDto: CreateClienteDto) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -41,7 +42,8 @@ export class ClientesService {
       atributoLogEntity.respuesta = `Respuesta Controlada: El cliente ha sido creado correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.clienteRepository.create(createClienteDto as any);
+      const data = await this.clienteRepository.create(createClienteDto as any);
+      return utils.templateResponse(data, HttpStatus.OK,  `Respuesta Controlada: El cliente ha sido creado correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método Crear cliente()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -53,7 +55,8 @@ export class ClientesService {
    
   }
 
-  findAll() {
+  async findAll() {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -65,7 +68,8 @@ export class ClientesService {
       atributoLogEntity.respuesta = `Consulta de listar clientes obtenidas correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.clienteRepository.findAll();
+      const data = await this.clienteRepository.findAll();
+      return utils.templateResponse(data, HttpStatus.OK,  `Consulta de listar clientes obtenidas correctamente - Status: ${HttpStatus.OK}`,  `${this.SERVICIO} - Método Listar clientes()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -78,7 +82,8 @@ export class ClientesService {
    
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -90,7 +95,8 @@ export class ClientesService {
       atributoLogEntity.respuesta = `Consulta de cliente ${id} obtenida correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.clienteRepository.findByPk(id);
+      const data = await this.clienteRepository.findByPk(id);
+      return utils.templateResponse(data, HttpStatus.OK,  `Consulta de cliente ${id} obtenida correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método buscar cliente()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -102,7 +108,8 @@ export class ClientesService {
     
   }
 
-  update(id: number, updateClienteDto: UpdateClienteDto) {
+  async update(id: number, updateClienteDto: UpdateClienteDto) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -114,7 +121,8 @@ export class ClientesService {
       atributoLogEntity.respuesta = `Actualizar cliente ${id} guardada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.clienteRepository.update(updateClienteDto as any, { where: { id } });
+      const data = await this.clienteRepository.update(updateClienteDto as any, { where: { id } });
+      return utils.templateResponse(data, HttpStatus.OK,  `Actualizar cliente ${id} guardada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método actualizar cliente()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
@@ -126,7 +134,8 @@ export class ClientesService {
     
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const utils = new Utils();
     const atributoLogEntity = new AtributoLogEntity();
     atributoLogEntity.uuid = this.transactionLogsService.generateUUID();
     atributoLogEntity.codigo = this.CODIGO_SERVICIO;
@@ -138,7 +147,8 @@ export class ClientesService {
       atributoLogEntity.respuesta = `El cliente ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`;
       atributoLogEntity.estado = '1';
       this.transactionLogsService.transactionLogs(atributoLogEntity);
-      return this.clienteRepository.destroy({ where: { id } });
+      const data = await this.clienteRepository.destroy({ where: { id } });
+      return utils.templateResponse(data, HttpStatus.OK,  `El cliente ${id} ha sido eliminada correctamente - Status: ${HttpStatus.OK}`, `${this.SERVICIO} - Método eliminar cliente()`);
     } catch (error) {
       const status = error.status || HttpStatus.INTERNAL_SERVER_ERROR;
       atributoLogEntity.respuesta = `Error: ${error.message} - Status:${status}`;
